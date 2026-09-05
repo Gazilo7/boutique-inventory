@@ -1,5 +1,6 @@
 "use client";
 
+import AdminGuard from "@/components/AdminGuard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -54,6 +55,7 @@ export default function AddProductPage() {
   }
 
   return (
+    <AdminGuard>
     <main className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-500 p-8 flex items-center justify-center">
       <div className="w-full max-w-xl">
         <Link href="/" className="inline-flex items-center text-sm text-white/80 hover:text-white mb-6 transition-colors">
@@ -122,5 +124,6 @@ export default function AddProductPage() {
         </motion.div>
       </div>
     </main>
+    </AdminGuard>
   );
 }
