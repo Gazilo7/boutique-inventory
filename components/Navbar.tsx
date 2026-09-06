@@ -8,10 +8,13 @@ import { useRouter } from "next/navigation";
 export default function Navbar() {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
+  // Add this mounted state to prevent hydration errors
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const status = localStorage.getItem("isAdmin");
     setIsAdmin(status === "true");
+    setMounted(true); // Tell React we are now on the client
   }, []);
 
   function handleLogout() {
@@ -28,38 +31,40 @@ export default function Navbar() {
             Boutique
           </span>
         </Link>
-        <div className="flex items-center gap-4">
-          <Link href="/shop" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
-            Shop
-          </Link>
-          <Link href="/cart" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
-            Cart
-          </Link>
-          
-          {/* Only Show Inventory to Admin (points to the Home Dashboard) */}
-          {isAdmin && (
-            <>
-              <Link href="/" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
-                Inventory
-              </Link>
-              <Link href="/products/add">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30">
-                  Add Item
-                </Button>
-              </Link>
-              <Button onClick={handleLogout} variant="outline" className="text-sm">
-                Logout
-              </Button>
-            </>
-          )}
-
-          {/* Only Show Login when not logged in */}
-          {!isAdmin && (
-            <Link href="/login" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
-              Admin Login
+        
+        {/* Only render the changing links AFTER the component has mounted */}
+        {mounted && (
+          <div className="flex items-center gap-4">
+            <Link href="/shop" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
+              Shop
             </Link>
-          )}
-        </div>
+            <Link href="/cart" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
+              Cart
+            </Link>
+            
+            {isAdmin && (
+              <>
+                <Link href="/" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
+                  Inventory
+                </Link>
+                <Link href="/products/add">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30">
+                    Add Item
+                  </Button>
+                </Link>
+                <Button onClick={handleLogout} variant="outline" className="text-sm">
+                  Logout
+                </Button>
+              </>
+            )}
+
+            {!isAdmin && (
+              <Link href="/login" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
+                Admin Login
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );

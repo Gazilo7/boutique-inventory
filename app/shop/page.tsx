@@ -6,26 +6,24 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
-
-const initialData = [
-  { id: "1", name: "Silk Scarf", sku: "SKU-001", price: 45, quantity: 10, image: "", videoUrl: "" },
-  { id: "2", name: "Leather Bag", sku: "SKU-002", price: 150, quantity: 5, image: "", videoUrl: "" },
-  { id: "3", name: "Gold Earrings", sku: "SKU-003", price: 80, quantity: 2, image: "", videoUrl: "" },
-];
+import { supabase } from "@/lib/supabase";
 
 export default function ShopPage() {
-  const [products, setProducts] = useState(initialData);
+  const [products, setProducts] = useState<any[]>([]);
   const [cart, setCart] = useState<{ id: string; qty: number }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load inventory items
-    const stored = localStorage.getItem("inventory");
-    if (stored) setProducts(JSON.parse(stored));
-
-    // Load cart items
+    fetchProducts();
     const storedCart = localStorage.getItem("cart");
     if (storedCart) setCart(JSON.parse(storedCart));
   }, []);
+
+  async function fetchProducts() {
+    const { data, error } = await supabase.from('products').select('*');
+    if (!error && data) setProducts(data);
+    setLoading(false);
+  }
 
   function addToCart(productId: string) {
     const existingItem = cart.find((item) => item.id === productId);
@@ -43,6 +41,8 @@ export default function ShopPage() {
 
   const totalCartItems = cart.reduce((acc, item) => acc + item.qty, 0);
 
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading shop...</div>;
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-8 md:p-10">
       <div className="max-w-6xl mx-auto">
@@ -55,10 +55,12 @@ export default function ShopPage() {
             <Link href="/">
               <Button variant="outline">Admin Login</Button>
             </Link>
-            <div className="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              <span className="font-bold">{totalCartItems}</span>
-            </div>
+            <Link href="/cart">
+              <div className="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                <span className="font-bold">{totalCartItems}</span>
+              </div>
+            </Link>
           </div>
         </header>
 
@@ -80,8 +82,8 @@ export default function ShopPage() {
                   <p className="text-xl font-bold text-indigo-600 mb-4">${p.price}</p>
                   
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-neutral-500">{p.quantity} available</span><Button onClick={() => addToCart(p.id)} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                      <Plus className="mr-2 h-4 w-4" /> Add to Cart
+                    <span className="text-sm text-neutral-500">{p.quantity} available</span>
+                    <Button onClick={() => addToCart(p.id)} className="bg-indigo-600 hover:bg-indigo-700 text-white"><Plus className="mr-2 h-4 w-4" /> Add to Cart
                     </Button>
                   </div>
                 </CardContent>
