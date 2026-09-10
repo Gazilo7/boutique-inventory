@@ -3,29 +3,36 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Lock } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Force a fresh login state when the page loads
-  useEffect(() => {
-    localStorage.removeItem("isAdmin");
-  }, []);
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const username = formData.get("username");
-    const password = formData.get("password");
+    setLoading(true);
+    setError("");
 
-    if (username === "admin" && password === "admin123") {
-      localStorage.setItem("isAdmin", "true");
-      router.push("/");
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    // Real Supabase Authentication
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
     } else {
-      setError("Invalid username or password. Hint: admin / admin123");
+      router.push("/");
+      router.refresh(); // Refresh to update the Navbar
     }
   }
 
@@ -37,23 +44,23 @@ export default function LoginPage() {
             <Lock className="h-6 w-6 text-indigo-600" />
           </div>
           <h1 className="text-2xl font-bold text-neutral-900">Admin Login</h1>
-          <p className="text-sm text-neutral-500 mt-1">Enter credentials to manage inventory</p>
+          <p className="text-sm text-neutral-500 mt-1">Enter your credentials</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Username</label>
-            <Input name="username" placeholder="admin" required />
+            <label className="text-sm font-medium text-neutral-700">Email</label>
+            <Input name="email" type="email" placeholder="admin@boutique.com" required />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-neutral-700">Password</label>
-            <Input name="password" type="password" placeholder="admin123" required />
+            <Input name="password" type="password" placeholder="••••••••" required />
           </div>
           
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
 
-          <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
-            Login
+          <Button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
       </div>

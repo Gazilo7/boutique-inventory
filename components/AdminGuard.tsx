@@ -2,18 +2,23 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem("isAdmin");
-    if (isAdmin !== "true") {
-      router.push("/login");
-    } else {
-      setIsLoading(false);
+    async function checkUser() {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push("/login");
+      } else {
+        setIsLoading(false);
+      }
     }
+    checkUser();
   }, [router]);
 
   if (isLoading) {

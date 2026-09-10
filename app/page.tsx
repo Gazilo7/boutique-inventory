@@ -1,6 +1,5 @@
 "use client";
 
-import AdminGuard from "@/components/AdminGuard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,29 +7,38 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Trash2, ImageOff, Video, Pencil, Search, Package, DollarSign, AlertTriangle, Moon, Sun } from "lucide-react";
-
-const initialData = [
-  { id: "1", name: "Silk Scarf", sku: "SKU-001", price: 45, quantity: 10, image: "", videoUrl: "" },
-  { id: "2", name: "Leather Bag", sku: "SKU-002", price: 150, quantity: 5, image: "", videoUrl: "" },
-  { id: "3", name: "Gold Earrings", sku: "SKU-003", price: 80, quantity: 2, image: "", videoUrl: "" },
-];
+import AdminGuard from "@/components/AdminGuard";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
-  const [products, setProducts] = useState(initialData);
+  const [products, setProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDark, setIsDark] = useState(false);
   const [sortBy, setSortBy] = useState("none");
+  const [loading, setLoading] = useState(true);
 
+  // Fetch products from Supabase
   useEffect(() => {
-    const stored = localStorage.getItem("inventory");
-    if (stored) setProducts(JSON.parse(stored));
+    fetchProducts();
   }, []);
 
-  const totalItems = products.reduce((acc, p) => acc + p.quantity, 0);
-  const totalValue = products.reduce((acc, p) => acc + (p.price * p.quantity), 0);
-  const lowStockItems = products.filter((p) => p.quantity <= 2).length;
+  async function fetchProducts() {
+    try {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) throw error;
+      if (data) setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  let filteredProducts = products.filter((p) =>
+  const totalItems = products.reduce((acc: number, p: any) => acc + p.quantity, 0);
+  const totalValue = products.reduce((acc: number, p: any) => acc + (p.price * p.quantity), 0);
+  const lowStockItems = products.filter((p: any) => p.quantity <= 2).length;
+
+  let filteredProducts = products.filter((p: any) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -43,11 +51,16 @@ export default function Home() {
     filteredProducts = [...filteredProducts].sort((a, b) => a.quantity - b.quantity);
   }
 
-  function deleteProduct(id: string) {
-    const updatedProducts = products.filter((p) => p.id !== id);
-    setProducts(updatedProducts);
-    localStorage.setItem("inventory", JSON.stringify(updatedProducts));
+  async function deleteProduct(id: string) {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (!error) {
+      setProducts(products.filter((p: any) => p.id !== id));
+    } else {
+      console.error('Error deleting:', error);
+    }
   }
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-neutral-500">Loading your inventory...</div>;
 
   return (
     <AdminGuard>
@@ -71,11 +84,11 @@ export default function Home() {
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <Card className={isDark ? "bg-neutral-900 border-neutral-800 shadow-xl" : "bg-white shadow-xl border-0"}>
-              <CardContent className="p-6 flex items-center gap-4">
+            <Card className={isDark ? "bg-neutral-900 border-neutral-800 shadow-xl" : "bg-white shadow-xl border-0"}><CardContent className="p-6 flex items-center gap-4">
                 <div className="bg-blue-100 p-3 rounded-full"><Package className="h-6 w-6 text-blue-600" /></div>
                 <div>
-                  <p className={isDark ? "text-sm text-neutral-400" : "text-sm text-neutral-500"}>Total Units</p><h3 className={isDark ? "text-2xl font-bold text-white" : "text-2xl font-bold text-neutral-900"}>{totalItems}</h3>
+                  <p className={isDark ? "text-sm text-neutral-400" : "text-sm text-neutral-500"}>Total Units</p>
+                  <h3 className={isDark ? "text-2xl font-bold text-white" : "text-2xl font-bold text-neutral-900"}>{totalItems}</h3>
                 </div>
               </CardContent>
             </Card>
@@ -120,10 +133,10 @@ export default function Home() {
                     {p.image ? (
                       <img src={p.image} alt={p.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden'); }} />
                     ) : (
-                      <div className="hidden absolute inset-0 flex flex-col items-center justify-center text-neutral-400"><ImageOff className="h-10 w-10 mb-2" /><span className="text-sm">No Image</span></div>
-                    )}
+                      <div className="hidden absolute inset-0 flex flex-col items-center justify-center text-neutral-400"><ImageOff className="h-10 w-10 mb-2" /><span className="text-sm">No Image</span></div>)}
                     <div className="absolute top-2 right-2 flex gap-2">
-                      <Link href={"/products/edit/" + p.id}><Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-white/80 hover:bg-white"><Pencil className="h-4 w-4 text-neutral-700" /></Button></Link><Button variant="destructive" size="icon" className="h-8 w-8 rounded-full" onClick={() => deleteProduct(p.id)}><Trash2 className="h-4 w-4" /></Button>
+                      <Link href={"/products/edit/" + p.id}><Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-white/80 hover:bg-white"><Pencil className="h-4 w-4 text-neutral-700" /></Button></Link>
+                      <Button variant="destructive" size="icon" className="h-8 w-8 rounded-full" onClick={() => deleteProduct(p.id)}><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </div>
                   <CardContent className="p-6">
@@ -134,7 +147,7 @@ export default function Home() {
                       <span className={isDark ? "text-sm font-medium text-neutral-300" : "text-sm font-medium text-neutral-700"}>Qty: {p.quantity}</span>
                       {p.quantity <= 2 ? (<span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">Low Stock</span>) : (<span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">In Stock</span>)}
                     </div>
-                    {p.videoUrl && (<Link href={p.videoUrl} target="_blank" className="mt-4 flex items-center gap-2 text-sm text-blue-600 hover:underline"><Video className="h-4 w-4" /> Watch Product Video</Link>)}
+                    {p.video_url && (<Link href={p.video_url} target="_blank" className="mt-4 flex items-center gap-2 text-sm text-blue-600 hover:underline"><Video className="h-4 w-4" /> Watch Product Video</Link>)}
                   </CardContent>
                 </Card>
               </motion.div>

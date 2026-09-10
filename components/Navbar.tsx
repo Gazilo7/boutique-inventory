@@ -4,21 +4,33 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
-  // Add this mounted state to prevent hydration errors
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const status = localStorage.getItem("isAdmin");
-    setIsAdmin(status === "true");
-    setMounted(true); // Tell React we are now on the client
+    setMounted(true);
+
+    // 1. Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAdmin(!!session);
+    });
+
+    // 2. Listen for auth changes (login / logout)
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAdmin(!!session);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  function handleLogout() {
-    localStorage.removeItem("isAdmin");
+  async function handleLogout() {
+    await supabase.auth.signOut();
     setIsAdmin(false);
     router.push("/login");
   }
@@ -32,7 +44,6 @@ export default function Navbar() {
           </span>
         </Link>
         
-        {/* Only render the changing links AFTER the component has mounted */}
         {mounted && (
           <div className="flex items-center gap-4">
             <Link href="/shop" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">

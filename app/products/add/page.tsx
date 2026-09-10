@@ -13,41 +13,71 @@ import { supabase } from "@/lib/supabase";
 export default function AddProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    
+    if (selectedFile.size > 2 * 1024 * 1024) {
       alert("Please upload an image smaller than 2MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (event) => setImagePreview(event.target?.result as string);
-    reader.readAsDataURL(file);
+
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile)); // Local preview
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
 
-    const formData = new FormData(event.currentTarget);
+    let imageUrl = "";
+
+    // 1. Upload image to Supabase Storage if a file exists
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      // Using string concatenation instead of template literal to avoid the regex bug
+      const fileName = Date.now().toString() + "." + fileExt;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        alert("Failed to upload image. Check the console.");
+        setLoading(false);
+        return;
+      }
+
+      // Get the public URL of the uploaded image
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+      
+      imageUrl = data.publicUrl;
+    }
+
+    // 2. Save the product data to the database
+    const formData = new FormData(form);
     const newProduct = {
-      id: Date.now().toString(), // Generate a unique ID
+      id: Date.now().toString(),
       name: formData.get("name") as string,
       sku: formData.get("sku") as string,
       price: parseFloat(formData.get("price") as string),
       quantity: parseInt(formData.get("quantity") as string),
-      image: imagePreview || "",
-      video_url: formData.get("videoUrl") as string, // Matches Supabase column
+      image: imageUrl, // Save the public URL instead of Base64
+      video_url: formData.get("videoUrl") as string,
     };
 
-    // Insert into Supabase
     const { error } = await supabase.from('products').insert([newProduct]);
 
     if (error) {
       console.error("Error adding product:", error);
-      alert("Failed to add product. Please check the terminal for details.");
+      alert("Failed to add product. Check the console.");
     } else {
       router.push("/");
     }
@@ -70,9 +100,7 @@ export default function AddProductPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white/90">Product Name</label>
                   <Input className="bg-white/20 border-white/30 text-white placeholder:text-white/50 focus-visible:ring-white" placeholder="Silk Scarf" name="name" required />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                </div><div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-white/90">SKU</label>
                     <Input className="bg-white/20 border-white/30 text-white placeholder:text-white/50" placeholder="SKU-004" name="sku" required />
@@ -81,7 +109,9 @@ export default function AddProductPage() {
                     <label className="text-sm font-medium text-white/90">Price ($)</label>
                     <Input className="bg-white/20 border-white/30 text-white placeholder:text-white/50" type="number" placeholder="45" name="price" required />
                   </div>
-                </div><div className="space-y-2">
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-medium text-white/90">Quantity</label>
                   <Input className="bg-white/20 border-white/30 text-white placeholder:text-white/50" type="number" placeholder="10" name="quantity" required />
                 </div>
@@ -95,9 +125,9 @@ export default function AddProductPage() {
                 </div>
 
                 <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center cursor-pointer hover:bg-white/10 transition-colors relative">
-                  {imagePreview ? (
+                  {preview ? (
                     <div className="flex flex-col items-center">
-                      <img src={imagePreview} alt="Preview" className="max-h-40 rounded-lg mb-2" />
+                      <img src={preview} alt="Preview" className="max-h-40 rounded-lg mb-2" />
                       <p className="text-white/70 text-xs">Click to change image</p>
                     </div>
                   ) : (
@@ -114,7 +144,7 @@ export default function AddProductPage() {
                     <Button type="button" variant="outline" className="bg-transparent text-white border-white/40 hover:bg-white/10">Cancel</Button>
                   </Link>
                   <Button type="submit" disabled={loading} className="bg-white text-indigo-600 hover:bg-indigo-50 shadow-lg">
-                    {loading ? "Saving..." : "Save Item"}
+                    {loading ? "Uploading..." : "Save Item"}
                   </Button>
                 </div>
               </form>
