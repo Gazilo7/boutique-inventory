@@ -58,6 +58,9 @@ export default function Navbar() {
                 <Link href="/" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
                   Inventory
                 </Link>
+                <Link href="/orders" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
+                  Orders
+                </Link>
                 <Link href="/products/add">
                   <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/30">
                     Add Item
