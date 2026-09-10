@@ -2,7 +2,7 @@
 
 A modern, full-stack luxury retail showcase and administrative inventory control platform built with React, Vite, and Tailwind CSS.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-boutique--inventory--chi.vercel.app-purple?style=for-the-badge&logo=vercel)](https://boutique-inventory-gazilo.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-boutique--inventory--gazilo.vercel.app-purple?style=for-the-badge&logo=vercel)](https://boutique-inventory-gazilo.vercel.app/)
 
 ## 🌟 Key Features
 
