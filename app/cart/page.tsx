@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
@@ -71,7 +72,7 @@ export default function CartPage() {
 
     if (orderError) {
       console.error("Error placing order:", orderError);
-      alert("Failed to place order. Please check the console.");
+      toast.error("Failed to place order. Please check the console.");
       setLoading(false);
       return;
     }
@@ -90,7 +91,7 @@ export default function CartPage() {
 
       if (updateError) {
         console.error("Failed to update stock for: " + item.name, updateError);
-        alert("Database Error: Could not update stock for " + item.name + ". Check the browser console (F12).");
+        toast.error("Database Error: Could not update stock for " + item.name + ". Check the browser console (F12).");
       }
     }
 
@@ -98,6 +99,7 @@ export default function CartPage() {
     localStorage.removeItem("cart");
     setCart([]);
     setSuccess(true);
+    toast.success("Order placed successfully!");
     setLoading(false);
   }
 

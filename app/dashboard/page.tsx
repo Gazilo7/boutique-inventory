@@ -60,7 +60,41 @@ export default function Home() {
     }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-neutral-500">Loading your inventory...</div>;
+  if (loading) {
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-8 md:p-10">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-10">
+          <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Elegant & Luxe Dashboard</h1>
+          <p className="text-neutral-500 mt-2">Manage your inventory with style.</p>
+        </header>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="bg-white rounded-xl shadow-xl p-6 h-28 animate-pulse flex items-center gap-4">
+              <div className="h-12 w-12 bg-neutral-200 rounded-full" />
+              <div className="flex-1 space-y-3">
+                <div className="h-4 w-1/2 bg-neutral-200 rounded" />
+                <div className="h-6 w-1/3 bg-neutral-200 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="h-14 w-full bg-white rounded-lg shadow-md animate-pulse mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="bg-white rounded-xl shadow-xl overflow-hidden">
+              <div className="h-48 w-full bg-neutral-200 animate-pulse" />
+              <div className="p-6 space-y-4">
+                <div className="h-6 w-3/4 bg-neutral-200 rounded animate-pulse" />
+                <div className="h-6 w-1/4 bg-neutral-200 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
 
   return (
     <AdminGuard>
@@ -68,7 +102,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <header className="flex justify-between items-center mb-10">
             <div>
-              <h1 className={isDark ? "text-5xl font-black tracking-tight text-white" : "text-5xl font-black tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"}>Boutique Dashboard</h1>
+              <h1 className={isDark ? "text-5xl font-black tracking-tight text-white" : "text-5xl font-black tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"}>Elegant & Luxe Dashboard</h1>
               <p className={isDark ? "text-neutral-400 mt-2" : "text-neutral-500 mt-2"}>Manage your inventory with style.</p>
             </div>
             <div className="flex gap-2">

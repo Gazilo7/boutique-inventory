@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
 export default function ShopPage() {
@@ -37,32 +38,40 @@ export default function ShopPage() {
     }
     setCart(newCart);
     localStorage.setItem("cart", JSON.stringify(newCart));
+    toast.success("Added to cart!");
   }
 
-  const totalCartItems = cart.reduce((acc, item) => acc + item.qty, 0);
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading shop...</div>;
+  if (loading) {
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-8 md:p-10">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-10">
+          <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Elegant & Luxe Shop</h1>
+          <p className="text-neutral-500 mt-2">Discover our latest collections.</p>
+        </header>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <div key={item} className="bg-white rounded-xl shadow-xl overflow-hidden border-0">
+              <div className="h-48 w-full bg-neutral-200 animate-pulse" />
+              <div className="p-6">
+                <div className="h-6 w-3/4 bg-neutral-200 rounded animate-pulse mb-3" />
+                <div className="h-6 w-1/4 bg-neutral-200 rounded animate-pulse mb-6" />
+                <div className="flex justify-between items-center">
+                  <div className="h-4 w-1/3 bg-neutral-200 rounded animate-pulse" />
+                  <div className="h-9 w-1/3 bg-neutral-200 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-8 md:p-10">
       <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-10">
-          <div>
-            <h1 className="text-5xl font-black tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Boutique Shop</h1>
-            <p className="text-neutral-500 mt-2">Discover our latest collections.</p>
-          </div>
-          <div className="flex gap-4 items-center">
-            <Link href="/">
-              <Button variant="outline">Admin Login</Button>
-            </Link>
-            <Link href="/cart">
-              <div className="bg-indigo-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="font-bold">{totalCartItems}</span>
-              </div>
-            </Link>
-          </div>
-        </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((p) => (

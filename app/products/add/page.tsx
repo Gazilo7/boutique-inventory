@@ -9,6 +9,7 @@ import { ArrowLeft, UploadCloud, Video } from "lucide-react";
 import { motion } from "framer-motion";
 import AdminGuard from "@/components/AdminGuard";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function AddProductPage() {
     if (!selectedFile) return;
     
     if (selectedFile.size > 2 * 1024 * 1024) {
-      alert("Please upload an image smaller than 2MB.");
+      toast.error("Please upload an image smaller than 2MB.");
       return;
     }
 
@@ -48,7 +49,7 @@ export default function AddProductPage() {
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
-        alert("Failed to upload image. Check the console.");
+        toast.error("Failed to upload image. Check the console.");
         setLoading(false);
         return;
       }
@@ -77,8 +78,9 @@ export default function AddProductPage() {
 
     if (error) {
       console.error("Error adding product:", error);
-      alert("Failed to add product. Check the console.");
+      toast.error("Failed to add product. Check the console.");
     } else {
+      toast.success("Product added successfully!");
       router.push("/");
     }
     setLoading(false);

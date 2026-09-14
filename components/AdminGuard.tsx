@@ -8,11 +8,15 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
+  // ⚠️ CHANGE THIS to the exact same admin email you used above!
+  const ADMIN_EMAIL = "gazamarkus@yahoo.com"; 
+
   useEffect(() => {
     async function checkUser() {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
+      // If no session OR the user is not the admin, kick them out
+      if (!session || session.user.email !== ADMIN_EMAIL) {
         router.push("/login");
       } else {
         setIsLoading(false);

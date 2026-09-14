@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Boutique Inventory",
+  title: "Elegant & Luxe",
   description: "Inventory management for your boutique",
 };
 
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="bg-neutral-100 text-neutral-900 antialiased">
         <Navbar />
         {children}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

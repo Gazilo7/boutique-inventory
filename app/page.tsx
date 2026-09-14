@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShoppingBag, ArrowRight, Star, Sparkles, ShieldCheck } from "lucide-react";
+import { ShoppingBag, ArrowRight, Star, Gem, ShieldCheck, BadgeCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -38,7 +38,7 @@ export default function LandingPage() {
           className="text-center max-w-4xl mx-auto"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-sm font-medium mb-8">
-            <Sparkles className="h-4 w-4" /> Discover curated luxury
+            <Gem className="h-4 w-4" /> Discover curated luxury
           </div>
           
           <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-tight">
@@ -79,7 +79,7 @@ export default function LandingPage() {
             <p className="text-neutral-400">Only the finest materials and craftsmanship make it to our shelves.</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
-            <Sparkles className="h-8 w-8 text-purple-400 mb-4" />
+            <BadgeCheck className="h-8 w-8 text-purple-400 mb-4" />
             <h3 className="text-xl font-bold mb-2">Curated Selection</h3><p className="text-neutral-400">Every item is handpicked by our team to ensure unique style.</p>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import AdminGuard from "@/components/AdminGuard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Package, Clock, CheckCircle, User, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -31,6 +31,23 @@ export default function OrdersPage() {
     }
   }
 
+  async function updateStatus(orderId: string, newStatus: string) {
+    // Optimistic UI update (updates instantly on screen)
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
+    // Update in Supabase
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status.");
+      fetchOrders(); // Revert if it fails
+    }
+  }
+
   if (loading) return <div className="min-h-screen flex items-center justify-center text-neutral-500">Loading orders...</div>;
 
   return (
@@ -53,7 +70,6 @@ export default function OrdersPage() {
               {orders.map((order) => (
                 <motion.div key={order.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                   <Card className="bg-white shadow-xl border-0 overflow-hidden">
-                    {/* Order Header */}
                     <div className="bg-neutral-50 border-b p-6 flex flex-wrap justify-between items-center gap-4">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2 text-neutral-900 font-bold text-lg">
@@ -71,16 +87,28 @@ export default function OrdersPage() {
                           <p className="text-sm text-neutral-500">Total Amount</p>
                           <p className="text-2xl font-bold text-indigo-600">${order.total_amount.toFixed(2)}</p>
                         </div>
-                        <div className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+
+                        {/* Status Dropdown */}<div className="flex flex-col items-end gap-1">
+                          <span className="text-xs text-neutral-500 font-medium">Order Status</span>
+                          <select 
+                            value={order.status}
+                            onChange={(e) => updateStatus(order.id, e.target.value)}
+                            className={"px-3 py-1 rounded-full text-sm font-bold border-2 focus:outline-none " + 
+                              (order.status === 'pending' ? 'bg-yellow-100 border-yellow-300 text-yellow-700' : 
+                               order.status === 'shipped' ? 'bg-blue-100 border-blue-300 text-blue-700' : 
+                               'bg-green-100 border-green-300 text-green-700')}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                          </select>
                         </div>
                       </div>
                     </div>
 
-                    {/* Order Items */}
                     <CardContent className="p-6">
-                      <h3 className="font-bold text-lg mb-4 text-neutral-800">Items Ordered</h3><div className="space-y-4">
+                      <h3 className="font-bold text-lg mb-4 text-neutral-800">Items Ordered</h3>
+                      <div className="space-y-4">
                         {order.items.map((item: any, index: number) => (
                           <div key={index} className="flex justify-between items-center bg-neutral-50 p-4 rounded-lg">
                             <div className="flex items-center gap-4">
@@ -102,10 +130,15 @@ export default function OrdersPage() {
                           <Clock className="h-4 w-4" />
                           Placed on: {new Date(order.created_at).toLocaleDateString()}
                         </span>
-                        <span className="flex items-center gap-2 text-green-600 font-medium">
-                          <CheckCircle className="h-4 w-4" />
-                          Payment Pending (Mock)
-                        </span>
+                        {order.status === 'delivered' ? (
+                          <span className="flex items-center gap-2 text-green-600 font-medium">
+                            <CheckCircle className="h-4 w-4" /> Delivered
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2 text-yellow-600 font-medium">
+                            <Clock className="h-4 w-4" /> In Progress
+                          </span>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
