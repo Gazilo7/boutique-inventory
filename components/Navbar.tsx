@@ -91,6 +91,14 @@ export default function Navbar() {
             <Link href="/track" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
               Track Order
             </Link>
+            <a
+            href="https://wa.me/+2349052467059"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-neutral-600 hover:text-neutral-900"
+            >
+              Support
+            </a>
 
             {/* Links for Logged-in Users */}
             {isLoggedIn && (

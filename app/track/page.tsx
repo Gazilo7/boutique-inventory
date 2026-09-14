@@ -73,6 +73,20 @@ export default function TrackPage() {
               <Button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
                 {loading ? "Searching..." : "Track Order"}
               </Button>
+
+              <div className="text-center mt-4">
+                <p className="text-sm text-neutral-500">
+                    Lost your Order ID?{""}
+                    <a
+                    href="https://wa.me/+2349052467059"
+                    target="_blank"
+                    rel="noopener norefferer"
+                    className="text-indigo-600 font-medium hover:underline"
+                    >
+                        Contact Support
+                    </a>
+                </p>
+              </div>
             </form>
           </CardContent>
         </Card>
