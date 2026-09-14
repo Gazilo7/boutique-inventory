@@ -9,7 +9,7 @@ import { ShoppingCart } from "lucide-react";
 
 export default function Navbar() {
   const router = useRouter();
-  const pathname = usePathname(); // Tracks the current URL
+  const pathname = usePathname(); // Tracks the current URLut
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
@@ -122,10 +122,7 @@ export default function Navbar() {
                 <Link href="/account" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
                   Login / Register
                 </Link>
-                {/* Subtle Admin Access Link */}
-                <Link href="/login" className="text-xs font-medium text-neutral-400 hover:text-neutral-600 transition-colors">
-                  Admin
-                </Link>
+
               </div>
             )}
           </div>

@@ -52,17 +52,13 @@ export default function LandingPage() {
             Explore our exclusive collection of handpicked items designed to bring elegance and style to your everyday life.
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <div className="flex justify-center">
             <Link href="/shop">
               <Button className="h-14 px-8 text-lg bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
                 <ShoppingBag className="mr-2 h-5 w-5" /> Shop Collection
               </Button>
             </Link>
-            <Link href="/login">
-              <Button variant="outline" className="h-14 px-8 text-lg rounded-full bg-neutral-900 border-neutral-700 hover:bg-neutral-800 text-white transition-all">
-                Admin Login
-              </Button>
-            </Link>
+           
           </div>
         </motion.div>
 
