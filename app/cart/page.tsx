@@ -15,6 +15,7 @@ export default function CartPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [placedOrderId,setPlacedOrderId] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
 
@@ -68,7 +69,7 @@ export default function CartPage() {
     };
 
     // 1. Insert the order into Supabase
-    const { error: orderError } = await supabase.from('orders').insert([orderData]);
+    const { data: insertedOrder, error: orderError } = await supabase.from('orders').insert([orderData]).select();
 
     if (orderError) {
       console.error("Error placing order:", orderError);
@@ -96,6 +97,7 @@ export default function CartPage() {
     }
 
     // 3. Success! Clear cart and show success screen
+    setPlacedOrderId(insertedOrder[0].id);
     localStorage.removeItem("cart");
     setCart([]);
     setSuccess(true);
@@ -104,18 +106,33 @@ export default function CartPage() {
   }
 
   if (success) {
-    return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-8 text-center">
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-          <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-6" /></motion.div>
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">Order Placed Successfully!</h1>
-        <p className="text-neutral-500 mb-8">Thank you for shopping with us. We will process your order shortly.</p>
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100 p-8 text-center">
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+        <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-6" />
+      </motion.div>
+      <h1 className="text-3xl font-bold text-neutral-900 mb-2">Order Placed Successfully!</h1>
+      <p className="text-neutral-500 mb-2">Thank you for shopping with us.</p>
+      
+      {/* Display the Order ID */}
+      <div className="bg-white p-4 rounded-lg shadow-sm mb-8 border">
+        <p className="text-sm text-neutral-500 mb-1">Your Order ID (Save this for tracking):</p>
+        <p className="font-mono font-bold text-indigo-600 text-lg">{placedOrderId}</p>
+      </div>
+
+      <div className="flex gap-4">
+        <Link href="/track">
+          <Button variant="outline" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+            Track My Order
+          </Button>
+        </Link>
         <Link href="/shop">
           <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">Continue Shopping</Button>
         </Link>
-      </main>
-    );
-  }
+      </div>
+    </main>
+  );
+}
 
   if (cartItems.length === 0) {
     return (

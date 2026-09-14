@@ -88,6 +88,9 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+            <Link href="/track" className="text-sm font-medium text-neutral-600 hover:text-neutral-900">
+              Track Order
+            </Link>
 
             {/* Links for Logged-in Users */}
             {isLoggedIn && (
